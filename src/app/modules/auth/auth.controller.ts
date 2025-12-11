@@ -5,6 +5,7 @@ import AppError from "../../errorHelper/AppError";
 import { sendResponse } from "../../utils/sendResponse";
 
 import passport from "passport";
+import { envVars } from "../../config/env";
 import { catchAsync } from "../../utils/catchAsync";
 import { setAuthCookie } from "../../utils/setCookie";
 import { createUserTokens } from "../../utils/userToken";
@@ -41,9 +42,43 @@ const credentialLogin = catchAsync(
         },
       });
     })(req, res, next);
+
+    // it can do but we use a reusable component for clean code ..
+    // res.cookie("accessToken", loginInfo.accessToken, {
+    //   httpOnly: true,
+    //   secure: false,
+    // });
+    // res.cookie("refreshToken", loginInfo.refreshToken, {
+    //   httpOnly: true,
+    //   secure: false,
+    // });
+    //  we use it here .....
+  }
+);
+
+const googleCallback = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let redirectTo = req.query.state ? String(req.query.state) : "";
+
+    if (redirectTo.startsWith("/")) {
+      redirectTo = redirectTo.slice(1);
+    }
+
+    const user = req.user;
+
+    console.log("google callback ", user);
+    if (!user) {
+      throw new AppError(StatusCodes.NOT_FOUND, "User Not Found");
+    }
+
+    const tokenInfo = createUserTokens(user);
+    setAuthCookie(res, tokenInfo);
+
+    res.redirect(`${envVars.FRONT_END_URL}/${redirectTo}`);
   }
 );
 
 export const AuthController = {
   credentialLogin,
+  googleCallback,
 };
