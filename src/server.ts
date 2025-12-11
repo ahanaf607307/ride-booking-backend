@@ -1,12 +1,11 @@
 import dotenv from "dotenv";
-import express from "express";
 import { Server } from "http";
 import mongoose from "mongoose";
+import app from "./app";
 import { envVars } from "./app/config/env";
 dotenv.config();
 
 let server: Server;
-const app = express();
 
 const startServer = async () => {
   try {
