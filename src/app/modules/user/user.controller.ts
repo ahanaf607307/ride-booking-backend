@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { UserService } from "./user.service";
+import { JwtPayload } from "jsonwebtoken";
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -12,7 +13,6 @@ const createUser = catchAsync(
       ...req.body,
       picture,
     };
-    console.log("picture file from user", payload);
     const result = await UserService.createUserService(payload);
     sendResponse(res, {
       success: true,
@@ -23,4 +23,20 @@ const createUser = catchAsync(
   }
 );
 
-export const UserController = { createUser };
+// Get My Profile
+const getMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload;
+    const userId = decodedToken.userId;
+    const result = await UserService.getMe(userId);
+
+    sendResponse(res, {
+      success: true,
+      message: "Get My profile retrieved Successfully",
+      statusCode: StatusCodes.OK,
+      data: result.data,
+    });
+  }
+);
+
+export const UserController = { createUser, getMe };

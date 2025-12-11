@@ -4,6 +4,10 @@ import { UserRoutes } from "../modules/user/user.route";
 export const router = Router();
 const moduleRoutes = [
   {
+    path: "/auth",
+    route: UserRoutes,
+  },
+  {
     path: "/user",
     route: UserRoutes,
   },

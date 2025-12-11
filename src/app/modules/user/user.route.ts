@@ -11,4 +11,5 @@ router.post(
   validateRequest(createUserValidationZodSchema),
   UserController.createUser
 );
+router.get("/me", UserController.getMe);
 export const UserRoutes = router;
