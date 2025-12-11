@@ -6,6 +6,7 @@ import { UserService } from "./user.service";
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log("from req user", req.body);
     const picture = req.file?.path;
     const payload = {
       ...req.body,

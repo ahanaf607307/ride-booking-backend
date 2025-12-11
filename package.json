@@ -26,8 +26,10 @@
     "typescript-eslint": "^8.49.0"
   },
   "dependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "bcrypt": "^6.0.0",
     "cloudinary": "^1.41.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
