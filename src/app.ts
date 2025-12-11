@@ -1,6 +1,10 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Request, Response } from "express";
+import expressSession from "express-session";
+import passport from "passport";
+import { envVars } from "./app/config/env";
+import "./app/config/passport.config";
 import { globalErrorHandler } from "./app/middleware/globalErrorHandler";
 import { notFound } from "./app/middleware/notFound";
 import { router } from "./app/router";
@@ -13,7 +17,18 @@ app.set("trust proxy", 1);
 app.use(cors());
 
 app.use(cookieParser());
+// for google authentication
+app.use(
+  expressSession({
+    secret: envVars.EXPRESS_SESSION,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 // ends for google authentication
+
 app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {

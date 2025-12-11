@@ -1,5 +1,6 @@
 import mongoose, { model } from "mongoose";
 import { IAuthProvider, IIsActive, IUser, Role } from "./user.interface";
+import fa from "zod/v4/locales/fa.js";
 
 const AuthProviderSchema = new mongoose.Schema<IAuthProvider>(
   {
@@ -28,7 +29,7 @@ const userSchema = new mongoose.Schema<IUser>(
       enum: Object.values(IIsActive),
       default: IIsActive.ACTIVE,
     },
-    isVerified: { type: Boolean, default: "false" },
+    isVerified: { type: Boolean, default: false },
     auths: { type: [AuthProviderSchema], required: true },
   },
   {
