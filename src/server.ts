@@ -3,6 +3,7 @@ import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
 import { envVars } from "./app/config/env";
+import { connectRedis } from "./app/config/redis.config";
 dotenv.config();
 
 let server: Server;
@@ -22,6 +23,7 @@ const startServer = async () => {
 
 // call server and seed supper admin in IIFE function
 (async () => {
+  await connectRedis();
   await startServer();
 })();
 
