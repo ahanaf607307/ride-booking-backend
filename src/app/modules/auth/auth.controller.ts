@@ -9,6 +9,7 @@ import { envVars } from "../../config/env";
 import { catchAsync } from "../../utils/catchAsync";
 import { setAuthCookie } from "../../utils/setCookie";
 import { createUserTokens } from "../../utils/userToken";
+import { AuthService } from "./auth.service";
 
 const credentialLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -56,6 +57,31 @@ const credentialLogin = catchAsync(
   }
 );
 
+const getNewAccessToken = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      throw new AppError(
+        StatusCodes.BAD_REQUEST,
+        "No refresh token received from cookies"
+      );
+    }
+    const tokenInfo = await AuthService.getNewAccessToken(
+      refreshToken as string
+    );
+
+    setAuthCookie(res, tokenInfo);
+
+    sendResponse(res, {
+      success: true,
+      message: "New access token retrieved Successfully",
+      statusCode: StatusCodes.OK,
+      data: tokenInfo,
+    });
+  }
+);
+
 const googleCallback = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let redirectTo = req.query.state ? String(req.query.state) : "";
@@ -80,5 +106,6 @@ const googleCallback = catchAsync(
 
 export const AuthController = {
   credentialLogin,
+  getNewAccessToken,
   googleCallback,
 };

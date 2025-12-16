@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { AuthController } from "./auth.controller";
 import passport from "passport";
 import { envVars } from "../../config/env";
+import { AuthController } from "./auth.controller";
 
 const router = Router();
 router.post("/login", AuthController.credentialLogin);
+router.post("/refresh-token", AuthController.getNewAccessToken);
 
 router.get(
   "/google",
