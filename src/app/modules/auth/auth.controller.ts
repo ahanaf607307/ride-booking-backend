@@ -82,6 +82,28 @@ const getNewAccessToken = catchAsync(
   }
 );
 
+const logout = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+
+    sendResponse(res, {
+      success: true,
+      message: "User logged out Successfully",
+      statusCode: StatusCodes.OK,
+      data: null,
+    });
+  }
+);
+
 const googleCallback = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let redirectTo = req.query.state ? String(req.query.state) : "";
@@ -107,5 +129,6 @@ const googleCallback = catchAsync(
 export const AuthController = {
   credentialLogin,
   getNewAccessToken,
+  logout,
   googleCallback,
 };
