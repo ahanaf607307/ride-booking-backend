@@ -171,6 +171,24 @@ const resetPassword = catchAsync(
   }
 );
 
+// set password >
+const setPassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { password } = req.body;
+    const decodedToken = req.user as JwtPayload;
+    const userId = decodedToken.userId;
+
+    await AuthService.setPassword(userId, password);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Password set Successfully",
+      data: null,
+    });
+  }
+);
+
 //end of the controller
 const googleCallback = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -201,6 +219,7 @@ export const AuthController = {
   changePassword,
   forgotPassword,
   resetPassword,
+  setPassword,
   //end of the controller
   googleCallback,
 };

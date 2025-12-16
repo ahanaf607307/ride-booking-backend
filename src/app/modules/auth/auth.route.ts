@@ -21,6 +21,12 @@ router.post(
   AuthController.resetPassword
 );
 
+router.post(
+  "/set-password",
+  checkAuth(...Object.values(Role)),
+  AuthController.setPassword
+);
+
 // end of the router
 
 router.get(

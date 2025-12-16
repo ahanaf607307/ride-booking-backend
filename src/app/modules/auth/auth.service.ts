@@ -7,7 +7,7 @@ import { envVars } from "../../config/env";
 import { sendEmail } from "../../config/sendEmail";
 import AppError from "../../errorHelper/AppError";
 import { createNewAccessTokenUsingRefreshToken } from "../../utils/userToken";
-import { IIsActive, IUser } from "../user/user.interface";
+import { IAuthProvider, IIsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 
 const credentialLogin = async (payload: Partial<IUser>) => {};
@@ -128,10 +128,43 @@ const resetPassword = async (
   await isUserExist.save();
 };
 
+const setPassword = async (userId: string, plainPassword: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(StatusCodes.FORBIDDEN, "User Not Found");
+  }
+
+  if (
+    user.password &&
+    user.auths.some((providerObject) => providerObject.provider === "google")
+  ) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "You already have password. Please change your password if needed"
+    );
+  }
+
+  // now hashed the password
+  const hashedPassword = await bcryptjs.hash(
+    plainPassword,
+    Number(envVars.BCRYPT_SALT_ROUND)
+  );
+  const credentialProvider: IAuthProvider = {
+    provider: "credentials",
+    providerId: user.email,
+  };
+
+  const auths: IAuthProvider[] = [...user.auths, credentialProvider];
+  user.password = hashedPassword;
+  user.auths = auths;
+  await user.save();
+};
+
 export const AuthService = {
   credentialLogin,
   getNewAccessToken,
   changePassword,
   forgotPassword,
   resetPassword,
+  setPassword,
 };
