@@ -2,11 +2,12 @@ import bcryptjs from "bcryptjs";
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { StatusCodes } from "http-status-codes";
-import { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
+import { sendEmail } from "../../config/sendEmail";
 import AppError from "../../errorHelper/AppError";
 import { createNewAccessTokenUsingRefreshToken } from "../../utils/userToken";
-import { IUser } from "../user/user.interface";
+import { IIsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 
 const credentialLogin = async (payload: Partial<IUser>) => {};
@@ -56,8 +57,57 @@ const changePassword = async (
   await user!.save();
 };
 
+const forgotPassword = async (email: string) => {
+  const isUserExist = await User.findOne({ email });
+  if (!isUserExist) {
+    throw new AppError(StatusCodes.FORBIDDEN, "User Not Found");
+  }
+
+  if (isUserExist.isVerified == false) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User is not verified..");
+  }
+
+  if (
+    isUserExist &&
+    (isUserExist.isActive === IIsActive.BLOCKED ||
+      isUserExist.isActive === IIsActive.INACTIVE)
+  ) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      `User is -> ${isUserExist.isActive}...`
+    );
+  }
+
+  if (isUserExist && isUserExist.isDeleted) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User is deleted...");
+  }
+
+  const jwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
+
+  const resetToken = jwt.sign(jwtPayload, envVars.JWT_ACCESS_SECRET, {
+    expiresIn: "10m",
+  });
+
+  const resetUILink = `${envVars.FRONT_END_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`;
+
+  sendEmail({
+    to: isUserExist.email,
+    subject: "Password Reset",
+    templateName: "forgotPassword",
+    templateData: {
+      name: isUserExist.name,
+      resetUILink,
+    },
+  });
+};
+
 export const AuthService = {
   credentialLogin,
   getNewAccessToken,
   changePassword,
+  forgotPassword,
 };

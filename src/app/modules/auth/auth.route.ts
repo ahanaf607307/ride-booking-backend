@@ -14,6 +14,7 @@ router.post(
   checkAuth(...Object.values(Role)),
   AuthController.changePassword
 );
+router.post("/forgot-password", AuthController.forgotPassword);
 
 // end of the router
 
