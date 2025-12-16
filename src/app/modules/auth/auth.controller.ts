@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../errorHelper/AppError";
 import { sendResponse } from "../../utils/sendResponse";
 
+import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { envVars } from "../../config/env";
 import { catchAsync } from "../../utils/catchAsync";
@@ -104,6 +105,35 @@ const logout = catchAsync(
   }
 );
 
+const changePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const newPassword = req.body.newPassword;
+    const oldPassword = req.body.oldPassword;
+    const decodedToken = req.user;
+    console.log(
+      "old",
+      oldPassword,
+      "new ",
+      newPassword,
+      "decodedToken ->",
+      decodedToken
+    );
+    await AuthService.changePassword(
+      oldPassword,
+      newPassword,
+      decodedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: "Password Changed Successfully",
+      data: null,
+    });
+  }
+);
+
+//end of the controller
 const googleCallback = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let redirectTo = req.query.state ? String(req.query.state) : "";
@@ -130,5 +160,7 @@ export const AuthController = {
   credentialLogin,
   getNewAccessToken,
   logout,
+  changePassword,
+  //end of the controller
   googleCallback,
 };
