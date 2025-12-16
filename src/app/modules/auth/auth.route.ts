@@ -15,6 +15,11 @@ router.post(
   AuthController.changePassword
 );
 router.post("/forgot-password", AuthController.forgotPassword);
+router.post(
+  "/reset-password",
+  checkAuth(...Object.values(Role)),
+  AuthController.resetPassword
+);
 
 // end of the router
 

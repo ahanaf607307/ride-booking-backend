@@ -105,9 +105,33 @@ const forgotPassword = async (email: string) => {
   });
 };
 
+//  Reset Password
+const resetPassword = async (
+  payload: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  const userId = decodedToken.userId;
+  if (payload.id != userId) {
+    throw new AppError(StatusCodes.FORBIDDEN, "Invalid User");
+  }
+  const isUserExist = await User.findById(decodedToken.userId);
+  if (!isUserExist) {
+    throw new AppError(StatusCodes.FORBIDDEN, " User dose not exist");
+  }
+  const newPlainPassword = payload.newPassword as string;
+  const hashedPassword = await bcryptjs.hash(
+    newPlainPassword,
+    Number(envVars.BCRYPT_SALT_ROUND)
+  );
+
+  isUserExist.password = hashedPassword;
+  await isUserExist.save();
+};
+
 export const AuthService = {
   credentialLogin,
   getNewAccessToken,
   changePassword,
   forgotPassword,
+  resetPassword,
 };
